@@ -1,0 +1,27 @@
+.app-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  app-sidebar {
+    width: 250px;  // Ajusta el tamaño según tu diseño
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .cliente-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .cliente-table th, .cliente-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  

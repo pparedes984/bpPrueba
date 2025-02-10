@@ -1,0 +1,19 @@
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 200px;
+    height: 100vh;
+    background: #f8f8f8;
+    z-index: 1000; // Asegura que esté por encima de otros elementos
+  }
+  
+  
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  li {
+    margin: 10px 0;
+  }

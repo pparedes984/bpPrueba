@@ -1,0 +1,33 @@
+<h2>Clientes</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Género</th>
+      <th>Edad</th>
+      <th>Identificación</th>
+      <th>Dirección</th>
+      <th>Teléfono</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let cliente of clientes">
+      <td>{{ cliente.name }}</td>
+      <td>{{ cliente.gender }}</td>
+      <td>{{ cliente.age }}</td>
+      <td>{{ cliente.dni }}</td>
+      <td>{{ cliente.address }}</td>
+      <td>{{ cliente.telephone }}</td>
+      <td>{{ cliente.state ? 'Activo' : 'Inactivo' }}</td>
+      <td>
+        <button (click)="updateCliente(cliente)">Editar</button>
+        <button (click)="deleteCliente(cliente.id)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Formulario de Edición -->
