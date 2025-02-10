@@ -1,11 +1,7 @@
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
- // Asegúrate de que la configuración esté importada
-import { BrowserModule } from '@angular/platform-browser';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
+// Importa el componente principal
 
-platformBrowserDynamic().bootstrapModule(appConfig, {
-  providers: [
-    importProvidersFrom(BrowserModule)
-  ]
-}).catch(err => console.error(err));
+bootstrapApplication(AppComponent, appConfig) // Primero AppComponent, luego appConfig
+  .catch(err => console.error(err));

@@ -1,4 +1,4 @@
-export interface Cliente {
+export interface Client {
     id: number;
     name: string;
     gender: string;
@@ -6,6 +6,7 @@ export interface Cliente {
     dni: string;
     address: string;
     telephone: string;
-    state: boolean;
+    state: string;
+    password: string
   }
   

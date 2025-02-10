@@ -1,51 +1,103 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ClientesService } from '../../core/services/clientes.service';
-import { Cliente } from '../../core/models/cliente.module';
+import { Client } from '../../core/models/client.module';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule], // Agregar esta línea
+  imports: [CommonModule, FormsModule], // Agregar esta línea
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.scss']
 })
-export class ClientesComponent {
-  clientes: Cliente[] = [];
-  clienteEditando: Cliente | null = null;
+export class ClientesComponent implements OnInit{
+  clients: Client[] = [];
+  clientesFiltrados: Client[] = [];
+  formularioVisible = false;
+  editando = false;
+  filtroId = '';
+  clienteForm: FormGroup;
 
-  constructor(private clientesService: ClientesService) {}
-
-  ngOnInit() {
-    this.cargarClientes();
-  }
-
-  cargarClientes() {
-    this.clientesService.getClientes().subscribe(data => {
-      console.log(data);
-      this.clientes = data;
+  constructor(private clientesService: ClientesService, private fb: FormBuilder) {
+    this.clienteForm = this.fb.group({
+      id: [null],
+      name: ['', Validators.required],
+      dni: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
+      telephone: ['', Validators.required],
+      address: ['', Validators.required],
+      gender: ['', Validators.required],
+      age: ['', [Validators.required, Validators.min(1)]],
+      state: ['', Validators.required],
+      password: ['', Validators.required]
     });
   }
 
-  deleteCliente(id: number) {
-    if (confirm('¿Estás seguro de eliminar este cliente?')) {
-      this.clientesService.deleteCliente(id).subscribe(() => {
-        this.clientes = this.clientes.filter(cliente => cliente.id !== id);
+  ngOnInit() {
+    this.cargarClientes();
+    this.clienteForm.get('id')?.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe(value => this.filtrarClientes(value));
+  }
+
+  cargarClientes(): void {
+    this.clientesService.getClients().subscribe({
+      next: clientes => {
+        this.clients = clientes;
+        this.clientesFiltrados = clientes;
+      },
+      error: err => console.error('Error al cargar clientes:', err)
+    });
+  }
+
+  filtrarClientes(termino: number): void {
+    this.clientesFiltrados = this.clients.filter(cliente =>
+      cliente.id === termino
+    );
+  }
+
+  nuevoCliente(): void {
+    this.clienteForm.reset();
+    this.formularioVisible = true;
+    this.editando = false;
+  }
+
+  updateClient(cliente: Client): void {
+    this.clienteForm.patchValue(cliente);
+    this.formularioVisible = true;
+    this.editando = true;
+  }
+
+  deleteClient(id: number): void {
+    if (confirm('¿Está seguro de eliminar este cliente?')) {
+      this.clientesService.deleteClient(id).subscribe({
+        next: () => this.cargarClientes(),
+        error: err => console.error('Error al eliminar cliente:', err)
       });
     }
   }
 
-  updateCliente(cliente: Cliente) {
-    this.clienteEditando = { ...cliente };
+  guardarCliente(): void {
+    if (this.clienteForm.invalid) return;
+    const cliente = this.clienteForm.value;
+    if (this.editando) {
+      this.clientesService.updateClient(cliente.id, cliente).subscribe({
+        next: () => this.cargarClientes(),
+        error: err => console.error('Error al actualizar cliente:', err)
+      });
+    } else {
+      this.clientesService.createClient(cliente).subscribe({
+        next: () => this.cargarClientes(),
+        error: err => console.error('Error al crear cliente:', err)
+      });
+    }
+    this.formularioVisible = false;
+  }
+  // Método para cancelar el formulario
+  cancelarFormulario(): void {
+    this.formularioVisible = false; // Ocultar el formulario
+    this.clienteForm.reset(); // Opcional: resetear el formulario
   }
 
-  guardarEdicion() {
-    if (this.clienteEditando) {
-      this.clientesService.updateCliente(this.clienteEditando.id, this.clienteEditando)
-        .subscribe(() => {
-          this.cargarClientes();
-          this.clienteEditando = null;
-        });
-    }
-  }
 }

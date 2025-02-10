@@ -1,1 +1,29 @@
-<p>movimientos works!</p>
+<h2>Movimientos</h2>
+
+<button class="btn btn-success">Guardar</button>
+<table>
+  <thead>
+    <tr>
+      <th>Fecha de movimiento</th>
+      <th>Tipo de transacción</th>
+      <th>Valor</th>
+      <th>Balance</th>
+      <th>Numero de cuenta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let transaction of transactions">
+      <td>{{ transaction.date }}</td>
+      <td>{{ transaction.transactionType }}</td>
+      <td>{{ transaction.value }}</td>
+      <td>{{ transaction.balance }}</td>
+      <td>{{ transaction.accountId }}</td>
+      <td>
+        <button (click)="updateTransaction(transaction)">Editar</button>
+        <button class="btn btn-danger" (click)="deleteTransaction(transaction.id)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Formulario de Edición -->

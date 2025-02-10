@@ -1,1 +1,29 @@
-<p>cuentas works!</p>
+<h2>Cuentas</h2>
+
+<button class="btn btn-success">Guardar</button>
+<table>
+  <thead>
+    <tr>
+      <th>Número de cuenta</th>
+      <th>Tipo de cuenta</th>
+      <th>Balance</th>
+      <th>Estado</th>
+      <th>Cliente</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let account of accounts">
+      <td>{{ account.accountNumber }}</td>
+      <td>{{ account.accountType }}</td>
+      <td>{{ account.openingBalance }}</td>
+      <td>{{ account.state }}</td>
+      <td>{{ account.clientId }}</td>
+      <td>
+        <button (click)="updateAccount(account)">Editar</button>
+        <button class="btn btn-danger" (click)="deleteAccount(account.id)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Formulario de Edición -->

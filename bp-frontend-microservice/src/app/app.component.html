@@ -1,12 +1,8 @@
-<div class="app-container">
-  <app-sidebar></app-sidebar>
-  <div class="main-content">
-    <h1>Clientes</h1>
-    <input type="text" placeholder="Buscar..." />
-    <button class="btn">Nuevo</button>
-    <table class="cliente-table">
-      <!-- Aquí irá el contenido de la tabla -->
-    </table>
-  </div>
-</div>
+<app-header></app-header>
+<div class="d-flex">
 
+  <app-sidebar></app-sidebar>
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>
