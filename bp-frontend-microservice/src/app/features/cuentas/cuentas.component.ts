@@ -4,6 +4,8 @@ import { CuentasService } from '../../core/services/cuentas.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime } from 'rxjs';
+import { Client } from '../../core/models/client.module';
+import { ClientesService } from '../../core/services/clientes.service';
 
 @Component({
   selector: 'app-cuentas',
@@ -15,16 +17,21 @@ import { debounceTime } from 'rxjs';
 export class CuentasComponent implements OnInit{
   accounts: Account[] = [];
   accountsFiltradas: Account[] = [];
+  clients: Client[] = [];
   formularioVisible = false;
   editando = false;
   filtroId = '';
   accountForm: FormGroup;
 
-  constructor(private accountService: CuentasService, private fb: FormBuilder) {
+  constructor(
+    private accountService: CuentasService, 
+    private fb: FormBuilder,
+    private clientesService: ClientesService
+  ) {
     this.accountForm = this.fb.group({
           id: [null],
           accountNumber: ['', Validators.required],
-          accountType: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
+          accountType: ['', Validators.required],
           openingBalance: ['', Validators.required],
           state: ['', Validators.required],
           clientId: ['', Validators.required]
@@ -33,9 +40,19 @@ export class CuentasComponent implements OnInit{
 
   ngOnInit() {
     this.cargarAccounts();
+    this.cargarClientes();
     this.accountForm.get('id')?.valueChanges
           .pipe(debounceTime(300))
           .subscribe(value => this.filtrarAccounts(value));
+  }
+
+  cargarClientes(): void {
+    this.clientesService.getClients().subscribe({
+      next: clientes => {
+        this.clients = clientes.filter(cliente => cliente.state === 'ACTIVO'); // Filtrar solo clientes activos
+      },
+      error: err => console.error('Error al cargar clientes:', err)
+    });
   }
 
   cargarAccounts():void {
@@ -96,6 +113,11 @@ export class CuentasComponent implements OnInit{
   cancelarFormulario(): void {
     this.formularioVisible = false; // Ocultar el formulario
     this.accountForm.reset(); // Opcional: resetear el formulario
+  }
+
+  obtenerNombreCliente(id: number): string {
+    const cliente = this.clients.find(c => c.id === id);
+    return cliente ? cliente.name : 'Desconocido';
   }
 }
 

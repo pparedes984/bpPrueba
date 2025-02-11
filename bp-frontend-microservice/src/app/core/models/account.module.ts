@@ -4,6 +4,6 @@ export interface Account {
     accountType: string;
     openingBalance: number;
     state: string;
-    clientId: string;
+    clientId: number;
   }
   
