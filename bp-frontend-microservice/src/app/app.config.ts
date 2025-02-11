@@ -6,11 +6,11 @@ import { MovimientosComponent } from './features/movimientos/movimientos.compone
 import { ReportesComponent } from './features/reportes/reportes.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    importProvidersFrom(FormsModule),
+    importProvidersFrom(FormsModule, ReactiveFormsModule),
     provideZoneChangeDetection({ eventCoalescing: true }), provideAnimationsAsync(), provideHttpClient(),
     provideRouter([
       { path: 'clientes', component: ClientesComponent },

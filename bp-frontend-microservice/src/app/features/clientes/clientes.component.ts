@@ -2,13 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { ClientesService } from '../../core/services/clientes.service';
 import { Client } from '../../core/models/client.module';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Agregar esta línea
+  imports: [CommonModule, FormsModule, ReactiveFormsModule], // Agregar esta línea
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.scss']
 })
@@ -51,9 +51,10 @@ export class ClientesComponent implements OnInit{
     });
   }
 
-  filtrarClientes(termino: number): void {
+  filtrarClientes(termino: string): void {
+    const idBuscado = Number(termino)
     this.clientesFiltrados = this.clients.filter(cliente =>
-      cliente.id === termino
+      cliente.id === idBuscado
     );
   }
 
