@@ -1,2 +1,26 @@
-<h2>Reportes</h2>
-<button (click)="generarPDF()">Descargar PDF</button>
+<div class="main-content">
+    <div class="gestion-entidades">
+        <h2>Reportes</h2>
+
+    <form (submit)="consultarReporte()">
+    <div class="form-group">
+        <label for="startDate">Fecha de inicio:</label>
+        <input type="date" id="startDate" [(ngModel)]="startDate" name="startDate" required>
+    </div>
+
+    <div class="form-group">
+        <label for="endDate">Fecha de fin:</label>
+        <input type="date" id="endDate" [(ngModel)]="endDate" name="endDate" required>
+    </div>
+
+    <button type="submit">Consultar Reporte</button>
+    </form>
+      
+    <div class="report-container" *ngIf="reportData">
+    <h3>Reporte Generado</h3>
+    <pre>{{ reportData | json }}</pre>
+    </div>
+      
+    <button (click)="generarPDF()" [disabled]="!reportData">Descargar PDF</button>   
+    </div>
+</div>

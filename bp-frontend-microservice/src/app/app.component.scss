@@ -1,28 +1,4 @@
-app-header {
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 60px; /* Ajusta según el tamaño de tu header */
-  background-color: #007bff;
-  z-index: 1000;
-  margin-bottom: 15px;
-}
 
-app-sidebar {
-  width: 250px; /* Ajusta el ancho del sidebar */
-  height: 100vh;
-  position: fixed;
-  top: 60px; /* Debe estar debajo del header */
-  left: 0;
-  background-color: #222;
-  color: white;
-  padding: 20px;
-}
 
-main {
-  margin-top: 120px; /* Ajusta el valor para que no se solape con el header */
-  margin-left: 300px; /* Ajusta según el ancho del sidebar */
-  padding: 20px;
-  width: calc(100% - 260px); /* Ajusta el ancho del contenido */
-}
+
+

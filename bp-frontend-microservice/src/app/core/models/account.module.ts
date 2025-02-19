@@ -2,7 +2,7 @@ export interface Account {
     id: number;
     accountNumber: string;
     accountType: string;
-    openingBalance: number;
+    balance: number;
     state: string;
     clientId: number;
   }

@@ -1,60 +1,61 @@
-<div class="container">
+<div class="gestion-entidades">
+
+  <div *ngIf="mensajeError" class="error-message">
+    {{ mensajeError }}
+  </div>
+  
   <h2>Gestion de Movimientos</h2>
 
-  <form *ngIf="formularioVisible" [formGroup]="transactionForm" (ngSubmit)="guardarTransaction()" class="mb-4">
-    <div class="form-group">
-      <label for="date">Fecha del movimiento</label>
-      <input type="date" id="date" formControlName="date" class="form-control" required>
-    </div>
+  <form *ngIf="formularioVisible" [formGroup]="transactionForm" (ngSubmit)="guardarTransaction()" class="general-form">
     <div class="form-group">
       <label for="transactionType">Tipo de movimiento</label>
-      <select id="transactionType" formControlName="transactionType" class="form-control">
-        <option value="Debito">Debito</option>
-        <option value="Credito">Credito</option>
+      <select id="transactionType" formControlName="transactionType" >
+        <option value="DEBITO">Debito</option>
+        <option value="CREDITO">Credito</option>
       </select>
     </div>
     <div class="form-group">
       <label for="value">Valor</label>
-      <input type="number" id="value" formControlName="value" class="form-control" required>
-    </div>
-    <div class="form-group">
-      <label for="balance">Balance</label>
-      <input type="number" id="balance" formControlName="balance" class="form-control" required>
+      <input type="number" id="value" formControlName="value" required>
     </div>
     <div class="form-group">
       <label for="accountId">Id de la cuenta</label>
-      <input type="number" id="accountId" formControlName="accountId" class="form-control" required>
+      <select id="accountId" formControlName="accountId" >
+        <option *ngFor="let account of accounts" [value]="account.id">{{ account.accountNumber }}</option>
+      </select>
     </div>
   
+    <div class="form-buttons">
+      <button type="submit" >{{ editando ? 'Actualizar' : 'Guardar' }}</button>
+      <button type="button"  (click)="cancelarFormulario()">Cancelar</button>
+    </div>
     
-    <button type="submit" class="btn btn-primary">{{ editando ? 'Actualizar' : 'Guardar' }}</button>
-    <button type="button" class="btn btn-secondary" (click)="cancelarFormulario()">Cancelar</button>
-  
   </form>
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <button class="btn btn-success" (click)="nuevaTransaction()" >Nueva Transaccion</button>
+  <div class="acciones">
+    <button (click)="nuevaTransaction()" >Nueva Transaccion</button>
     
   </div>
-  <table class="table table-striped table-hover">
-    <thead class="table-dark">
+  <table class="general-table">
+    <thead >
       <tr>
         <th>Fecha de movimiento</th>
         <th>Tipo de transacción</th>
         <th>Valor</th>
         <th>Balance</th>
         <th>Numero de cuenta</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let transaction of transactions">
-        <td>{{ transaction.date }}</td>
+        <td>{{ transaction.date | date }}</td>
         <td>{{ transaction.transactionType }}</td>
         <td>{{ transaction.value }}</td>
         <td>{{ transaction.balance }}</td>
-        <td>{{ transaction.accountId }}</td>
-        <td>
-          <button class="btn btn-primary btn-sm" (click)="updateTransaction(transaction)">Editar</button>
-          <button class="btn btn-danger btn-sm" (click)="deleteTransaction(transaction.id)">Eliminar</button>
+        <td>{{ getAccountNumber(+transaction.accountId) }}</td>
+        <td class="actions">
+          <button  (click)="updateTransaction(transaction)">Editar</button>
+          <button  (click)="deleteTransaction(transaction.id)">Eliminar</button>
         </td>
       </tr>
     </tbody>

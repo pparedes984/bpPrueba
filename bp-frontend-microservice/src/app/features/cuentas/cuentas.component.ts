@@ -22,6 +22,7 @@ export class CuentasComponent implements OnInit{
   editando = false;
   filtroId = '';
   accountForm: FormGroup;
+  mensajeError: string | null = null;
 
   constructor(
     private accountService: CuentasService, 
@@ -32,7 +33,7 @@ export class CuentasComponent implements OnInit{
           id: [null],
           accountNumber: ['', Validators.required],
           accountType: ['', Validators.required],
-          openingBalance: ['', Validators.required],
+          balance: ['', Validators.required],
           state: ['', Validators.required],
           clientId: ['', Validators.required]
     });
@@ -61,15 +62,23 @@ export class CuentasComponent implements OnInit{
         this.accounts = accounts;
         this.accountsFiltradas = accounts;
       },
-      error: err => console.error('Error al cargar cuentas:', err)
+      error: (err) => {
+        this.mensajeError = err.message;
+        console.error('Error al cargar cuentas:', err);
+      }
     });
   }
 
   filtrarAccounts(termino: string): void {
     const idBuscado = Number(termino)
-    this.accountsFiltradas = this.accounts.filter(account =>
-      account.id === idBuscado
-    );
+    if(termino==="") { 
+      this.accountsFiltradas = this.accounts
+    } else {
+      this.accountsFiltradas = this.accounts.filter(account =>
+        account.id === idBuscado
+      );
+    }
+    
   }
 
   nuevaAccount(): void {
@@ -87,8 +96,15 @@ export class CuentasComponent implements OnInit{
   deleteAccount(id: number) {
     if (confirm('¿Estás seguro de eliminar esta cuenta?')) {
       this.accountService.deleteAccount(id).subscribe({
-        next: () => this.cargarAccounts(),
-        error: err => console.error('Error al eliminar cuenta:', err)
+        next: () => {
+          this.cargarAccounts();
+          alert("Cuenta elminada exitosamente");
+        },
+        error: (err) => {
+          this.mensajeError = err.message;
+          console.error('Error al eliminar cuenta:', err);
+
+        }
       });
     }
   }
@@ -96,15 +112,30 @@ export class CuentasComponent implements OnInit{
   guardarAccount(): void {
     if (this.accountForm.invalid) return;
     const account = this.accountForm.value;
+    this.mensajeError = null; 
     if (this.editando) {
       this.accountService.updateAccount(account.id, account).subscribe({
-        next: () => this.cargarAccounts(),
-        error: err => console.error('Error al actualizar cuenta:', err)
+        next: () => {
+          this.cargarAccounts();
+          alert('Cuenta actualizada con éxito');
+          this.accountForm.reset();
+        },
+        error: (err) => {
+          this.mensajeError = err.message;
+          console.error('Error al actualizar cuenta:', err)
+        }
       });
     } else {
       this.accountService.createAccount(account).subscribe({
-        next: () => this.cargarAccounts(),
-        error: err => console.error('Error al crear cuenta:', err)
+        next: () => {
+          this.cargarAccounts();
+          alert('Transacción realizada con éxito');
+          this.accountForm.reset();
+        },
+        error: (err) => {
+          this.mensajeError = err.message;
+          console.error('Error al crear cuenta:', err)
+        }
       });
     }
     this.formularioVisible = false;

@@ -19,6 +19,7 @@ export class ClientesComponent implements OnInit{
   editando = false;
   filtroId = '';
   clienteForm: FormGroup;
+  mensajeError: string | null = null;
 
   constructor(private clientesService: ClientesService, private fb: FormBuilder) {
     this.clienteForm = this.fb.group({
@@ -47,15 +48,24 @@ export class ClientesComponent implements OnInit{
         this.clients = clientes;
         this.clientesFiltrados = clientes;
       },
-      error: err => console.error('Error al cargar clientes:', err)
+      error: (err) => {
+        this.mensajeError = err.message;
+        console.error('Error al cargar clientes:', err);
+      }
     });
   }
 
   filtrarClientes(termino: string): void {
+    
     const idBuscado = Number(termino)
-    this.clientesFiltrados = this.clients.filter(cliente =>
-      cliente.id === idBuscado
-    );
+    if(termino==="") {
+      this.clientesFiltrados = this.clients;
+    } else {
+      this.clientesFiltrados = this.clients.filter(cliente =>
+        cliente.id === idBuscado
+      );
+    }
+    
   }
 
   nuevoCliente(): void {
@@ -73,8 +83,14 @@ export class ClientesComponent implements OnInit{
   deleteClient(id: number): void {
     if (confirm('¿Está seguro de eliminar este cliente?')) {
       this.clientesService.deleteClient(id).subscribe({
-        next: () => this.cargarClientes(),
-        error: err => console.error('Error al eliminar cliente:', err)
+        next: () => {
+          alert('Cliente eliminado con éxito');
+          this.cargarClientes();
+        },
+        error: (err) => {
+          this.mensajeError = err.message;
+          console.error('Error al eliminar cliente:', err)
+        }
       });
     }
   }
@@ -82,15 +98,30 @@ export class ClientesComponent implements OnInit{
   guardarCliente(): void {
     if (this.clienteForm.invalid) return;
     const cliente = this.clienteForm.value;
+    this.mensajeError = null; 
     if (this.editando) {
       this.clientesService.updateClient(cliente.id, cliente).subscribe({
-        next: () => this.cargarClientes(),
-        error: err => console.error('Error al actualizar cliente:', err)
+        next: () => {
+          this.cargarClientes();
+          alert('Cliente actualizado con éxito');
+          this.clienteForm.reset();
+        },
+        error: (err) => {
+          this.mensajeError = err.message;
+          console.error('Error al actualizar cliente:', err);
+        }
       });
     } else {
       this.clientesService.createClient(cliente).subscribe({
-        next: () => this.cargarClientes(),
-        error: err => console.error('Error al crear cliente:', err)
+        next: () => {
+          this.cargarClientes();
+          alert('Transacción realizada con éxito');
+          this.clienteForm.reset();
+        },
+        error: (err) => {
+          this.mensajeError = err.message;
+          console.error('Error al crear cliente:', err)
+        }
       });
     }
     this.formularioVisible = false;

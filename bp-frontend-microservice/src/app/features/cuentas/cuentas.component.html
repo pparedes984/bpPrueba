@@ -1,69 +1,76 @@
-<div class="container">
+<div class="gestion-entidades">
+
+  <div *ngIf="mensajeError" class="error-message">
+    {{ mensajeError }}
+  </div>
 
   <h2>Gestión de Cuentas</h2>
 
-  <form *ngIf="formularioVisible" [formGroup]="accountForm" (ngSubmit)="guardarAccount()" class="mb-4">
+  <form *ngIf="formularioVisible" [formGroup]="accountForm" (ngSubmit)="guardarAccount()"  class="general-form">
     <div class="form-group">
       <label for="accountNumber">Numero de Cuenta</label>
-      <input type="text" id="accountNumber" formControlName="accountNumber" class="form-control" required>
+      <input type="text" id="accountNumber" formControlName="accountNumber" required>
     </div>
     <div class="form-group">
       <label for="accountType">Tipo de cuenta</label>
-      <select id="accountType" formControlName="accountType" class="form-control">
+      <select id="accountType" formControlName="accountType" >
         <option value="AHORROS">Ahorros</option>
         <option value="CORRIENTE">Corriente</option>
       </select>
     </div>
     <div class="form-group">
-      <label for="openingBalance">Balance</label>
-      <input type="number" id="openingBalance" formControlName="openingBalance" class="form-control" required>
+      <label for="balance">Balance</label>
+      <input type="number" id="balance" formControlName="balance"  required>
     </div>
     <div class="form-group">
       <label for="state">Estado</label>
-      <select id="state" formControlName="state" class="form-control">
+      <select id="state" formControlName="state" >
         <option value="ACTIVA">Activo</option>
         <option value="INACTIVA">Inactivo</option>
       </select>
     </div>
     <div class="form-group">
       <label for="clientId">Cliente</label>
-      <select id="clientId" formControlName="clientId" class="form-control">
+      <select id="clientId" formControlName="clientId" >
         <option *ngFor="let cliente of clients" [value]="cliente.id">{{ cliente.name }}</option>
       </select>
     </div>
+    <div class="form-buttons">
+      <button type="submit" >{{ editando ? 'Actualizar' : 'Guardar' }}</button>
+      <button type="button"  (click)="cancelarFormulario()">Cancelar</button>
+    </div>
     
-    <button type="submit" class="btn btn-primary">{{ editando ? 'Actualizar' : 'Guardar' }}</button>
-    <button type="button" class="btn btn-secondary" (click)="cancelarFormulario()">Cancelar</button>
   
   </form>
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <button class="btn btn-success" (click)="nuevaAccount()" >Nueva Cuenta</button>
+  <div class="acciones">
+    <button  (click)="nuevaAccount()" >Nueva Cuenta</button>
     
-    <div class="input-group w-25">
-      <input type="text" class="form-control" [(ngModel)]="filtroId" (ngModelChange)="filtrarAccounts(filtroId)"  placeholder="Buscar por ID Cuenta" aria-label="Buscar">
+    <div >
+      <input type="text" [(ngModel)]="filtroId" (ngModelChange)="filtrarAccounts(filtroId)"  placeholder="Buscar por ID Cuenta" aria-label="Buscar">
       
     </div>
   </div>
-  <table class="table table-striped table-hover">
-    <thead class="table-dark">
+  <table class="general-table">
+    <thead >
       <tr>
         <th>Número de cuenta</th>
         <th>Tipo de cuenta</th>
         <th>Balance</th>
         <th>Estado</th>
         <th>Cliente</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let account of accounts">
+      <tr *ngFor="let account of accountsFiltradas">
         <td>{{ account.accountNumber }}</td>
         <td>{{ account.accountType }}</td>
-        <td>{{ account.openingBalance }}</td>
+        <td>{{ account.balance }}</td>
         <td>{{ account.state }}</td>
         <td>{{ obtenerNombreCliente(+account.clientId) }}</td>
-        <td>
-          <button class="btn btn-primary btn-sm" (click)="updateAccount(account)">Editar</button>
-          <button class="btn btn-danger btn-sm" (click)="deleteAccount(account.id)">Eliminar</button>
+        <td class="actions">
+          <button  (click)="updateAccount(account)">Editar</button>
+          <button  (click)="deleteAccount(account.id)">Eliminar</button>
         </td>
       </tr>
     </tbody>
