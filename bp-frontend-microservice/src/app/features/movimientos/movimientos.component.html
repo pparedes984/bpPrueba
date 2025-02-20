@@ -17,6 +17,9 @@
     <div class="form-group">
       <label for="value">Valor</label>
       <input type="number" id="value" formControlName="value" required>
+      <div class="error" *ngIf="transactionForm.get('value')?.invalid && transactionForm.get('value')?.touched">
+        El valor es obligatorio.
+      </div>
     </div>
     <div class="form-group">
       <label for="accountId">Id de la cuenta</label>
@@ -33,7 +36,10 @@
   </form>
   <div class="acciones">
     <button (click)="nuevaTransaction()" >Nueva Transaccion</button>
-    
+    <div >
+      <input type="text" [(ngModel)]="filtroId" (ngModelChange)="filtrarTransactions(filtroId)"  placeholder="Buscar por ID Transaccion" aria-label="Buscar">
+      
+    </div>
   </div>
   <table class="general-table">
     <thead >
@@ -47,7 +53,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let transaction of transactions">
+      <tr *ngFor="let transaction of transactionsFiltradas">
         <td>{{ transaction.date | date }}</td>
         <td>{{ transaction.transactionType }}</td>
         <td>{{ transaction.value }}</td>

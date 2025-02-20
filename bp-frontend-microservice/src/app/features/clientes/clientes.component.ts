@@ -3,7 +3,7 @@ import { ClientesService } from '../../core/services/clientes.service';
 import { Client } from '../../core/models/client.module';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { debounceTime } from 'rxjs';
+import { debounceTime, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-clientes',
@@ -20,8 +20,12 @@ export class ClientesComponent implements OnInit{
   filtroId = '';
   clienteForm: FormGroup;
   mensajeError: string | null = null;
+  private subscriptions: Subscription = new Subscription();
 
-  constructor(private clientesService: ClientesService, private fb: FormBuilder) {
+  constructor(
+    private clientesService: ClientesService, 
+    private fb: FormBuilder
+  ) {
     this.clienteForm = this.fb.group({
       id: [null],
       name: ['', Validators.required],
@@ -37,36 +41,44 @@ export class ClientesComponent implements OnInit{
 
   ngOnInit() {
     this.cargarClientes();
-    this.clienteForm.get('id')?.valueChanges
+    const idChangeSub = this.clienteForm.get('id')?.valueChanges
       .pipe(debounceTime(300))
       .subscribe(value => this.filtrarClientes(value));
+
+    if (idChangeSub){
+      this.subscriptions.add(idChangeSub);
+    }
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   cargarClientes(): void {
-    this.clientesService.getClients().subscribe({
+    const loadSub = this.clientesService.getClients().subscribe({
       next: clientes => {
         this.clients = clientes;
-        this.clientesFiltrados = clientes;
+        this.clientesFiltrados = [...clientes];
       },
       error: (err) => {
         this.mensajeError = err.message;
         console.error('Error al cargar clientes:', err);
       }
     });
+    this.subscriptions.add(loadSub)
   }
 
   filtrarClientes(termino: string): void {
-    
-    const idBuscado = Number(termino)
-    if(termino==="") {
-      this.clientesFiltrados = this.clients;
-    } else {
-      this.clientesFiltrados = this.clients.filter(cliente =>
-        cliente.id === idBuscado
-      );
+    if (!termino) {
+      this.clientesFiltrados = [...this.clients]; // Mostrar todos si el campo está vacío
+      return;
     }
-    
+  
+    const idBuscado = Number(termino);
+    this.clientesFiltrados = this.clients.filter(cliente => 
+      cliente.id === idBuscado);
   }
+  
 
   nuevoCliente(): void {
     this.clienteForm.reset();
@@ -82,7 +94,7 @@ export class ClientesComponent implements OnInit{
 
   deleteClient(id: number): void {
     if (confirm('¿Está seguro de eliminar este cliente?')) {
-      this.clientesService.deleteClient(id).subscribe({
+      const deleteSub = this.clientesService.deleteClient(id).subscribe({
         next: () => {
           alert('Cliente eliminado con éxito');
           this.cargarClientes();
@@ -92,6 +104,7 @@ export class ClientesComponent implements OnInit{
           console.error('Error al eliminar cliente:', err)
         }
       });
+      this.subscriptions.add(deleteSub);
     }
   }
 
@@ -99,36 +112,26 @@ export class ClientesComponent implements OnInit{
     if (this.clienteForm.invalid) return;
     const cliente = this.clienteForm.value;
     this.mensajeError = null; 
-    if (this.editando) {
-      this.clientesService.updateClient(cliente.id, cliente).subscribe({
+    const saveSub = (this.editando ? this.clientesService.updateClient(cliente.id, cliente) : this.clientesService.createClient(cliente))
+      .subscribe({
         next: () => {
           this.cargarClientes();
-          alert('Cliente actualizado con éxito');
+          alert(this.editando ? 'Cliente actualizado con éxito' : 'Clienta guardado con éxito');
           this.clienteForm.reset();
         },
         error: (err) => {
           this.mensajeError = err.message;
-          console.error('Error al actualizar cliente:', err);
+          console.error(`Error al ${this.editando ? 'actualizar' : 'crear'} cliente:`, err);
         }
       });
-    } else {
-      this.clientesService.createClient(cliente).subscribe({
-        next: () => {
-          this.cargarClientes();
-          alert('Transacción realizada con éxito');
-          this.clienteForm.reset();
-        },
-        error: (err) => {
-          this.mensajeError = err.message;
-          console.error('Error al crear cliente:', err)
-        }
-      });
-    }
+
+    this.subscriptions.add(saveSub);
     this.formularioVisible = false;
   }
   // Método para cancelar el formulario
   cancelarFormulario(): void {
-    this.formularioVisible = false; // Ocultar el formulario
+    this.cargarClientes();
+    this.formularioVisible = false;
     this.clienteForm.reset(); // Opcional: resetear el formulario
   }
 

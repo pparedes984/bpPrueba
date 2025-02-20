@@ -28,7 +28,7 @@ export class CuentasService {
     );
   }
 
-  updateAccount(id: number, account: any): Observable<Account> {
+  updateAccount(id: number, account: Account): Observable<Account> {
     return this.http.put<Account>(`${this.apiUrl}/${id}`, account).pipe(
       catchError(error => {
         return throwError(() => new Error(error.error?.message || 'Error al procesar la transacción'));

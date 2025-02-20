@@ -10,6 +10,9 @@
     <div class="form-group">
       <label for="accountNumber">Numero de Cuenta</label>
       <input type="text" id="accountNumber" formControlName="accountNumber" required>
+      <div class="error" *ngIf="accountForm.get('accountNumber')?.invalid && accountForm.get('accountNumber')?.touched">
+        El numero de cuenta es obligatorio.
+      </div>
     </div>
     <div class="form-group">
       <label for="accountType">Tipo de cuenta</label>
@@ -19,8 +22,11 @@
       </select>
     </div>
     <div class="form-group">
-      <label for="balance">Balance</label>
+      <label for="balance">Balance inical</label>
       <input type="number" id="balance" formControlName="balance"  required>
+      <div class="error" *ngIf="accountForm.get('balance')?.invalid && accountForm.get('balance')?.touched">
+        El balance inicial es obligatorio.
+      </div>
     </div>
     <div class="form-group">
       <label for="state">Estado</label>

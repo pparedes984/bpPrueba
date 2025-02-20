@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Transaction } from '../../core/models/transaction.module';
 import { CommonModule } from '@angular/common';
 import { MovimientosService } from '../../core/services/movimientos.service';
-import { transition } from '@angular/animations';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { debounceTime } from 'rxjs';
+import { debounceTime, Subscription } from 'rxjs';
 import { CuentasService } from '../../core/services/cuentas.service';
 import { Account } from '../../core/models/account.module';
 
@@ -24,11 +23,13 @@ export class MovimientosComponent implements OnInit{
   transactionForm: FormGroup;
   mensajeError: string | null = null;
   accounts: Account[] = [];
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private transactionService: MovimientosService, 
     private fb: FormBuilder,
-    private accountService: CuentasService) {
+    private accountService: CuentasService
+  ) {
     this.transactionForm = this.fb.group({
               id: [null],
               transactionType: ['', Validators.required],
@@ -40,38 +41,53 @@ export class MovimientosComponent implements OnInit{
   ngOnInit() {
     this.cargarTransactions();
     this.getAccounts();
-    this.transactionForm.get('id')?.valueChanges
+    const idChangeSub = this.transactionForm.get('id')?.valueChanges
               .pipe(debounceTime(300))
               .subscribe(value => this.filtrarTransactions(value));
+    if (idChangeSub){
+      this.subscriptions.add(idChangeSub);
+    }
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   cargarTransactions():void {
-    this.transactionService.getTransaction().subscribe({
+    const loadSub = this.transactionService.getTransaction().subscribe({
       next: transactions => {
         this.transactions = transactions;
+        this.transactionsFiltradas = [...transactions]
       },
       error: (err) => {
         this.mensajeError = err.message;
         console.error('Error al cargar movimientos:', err)
       }
     });
+    this.subscriptions.add(loadSub)
   }
 
   getAccounts(): void {
-    this.accountService.getAccounts().subscribe({
+    const loadSub = this.accountService.getAccounts().subscribe({
       next: accounts => {
         this.accounts = accounts.filter(account => account.state === 'ACTIVA'); // Filtrar solo clientes activos
-        console.log(this.accounts);
       },
-      error: err => console.error('Error al cargar cuentas:', err)
+      error: (err) => {
+        this.mensajeError = err.message;
+        console.error('Error al cargar cuentas:', err);
+      }
     });
+    this.subscriptions.add(loadSub)
   }
 
   filtrarTransactions(termino: string): void {
+    if(!termino) { 
+      this.transactionsFiltradas = [...this.transactions];
+      return;
+    }
     const idBuscado = Number(termino)
     this.transactionsFiltradas = this.transactions.filter(transaction =>
-      transaction.id === idBuscado
-    );
+      Number(transaction.id) === idBuscado);
   }
 
   nuevaTransaction(): void {
@@ -88,7 +104,7 @@ export class MovimientosComponent implements OnInit{
 
   deleteTransaction(id: number) {
     if (confirm('¿Estás seguro de eliminar esta transacción?')) {
-      this.transactionService.deleteTransaction(id).subscribe({
+      const deleteSub = this.transactionService.deleteTransaction(id).subscribe({
         next: () => {
           alert('Transacción eliminada con éxito');
           this.cargarTransactions();
@@ -98,6 +114,7 @@ export class MovimientosComponent implements OnInit{
           console.error('Error al eliminar movimiento:', err);
         }
       });
+      this.subscriptions.add(deleteSub);
     }
   }
 
@@ -106,37 +123,27 @@ export class MovimientosComponent implements OnInit{
     if (this.transactionForm.invalid) return;
     const transaction = this.transactionForm.value;
     this.mensajeError = null; 
-    if (this.editando) {
-      this.transactionService.updateTransaction(transaction.id, transaction).subscribe({
+    const saveSub = (this.editando ? this.transactionService.updateTransaction(transaction.id, transaction) : this.transactionService.createTransaction(transaction))
+    .subscribe({
         next: () => {
           this.cargarTransactions();
-          alert('Transacción actualizada con éxito');
+          alert(this.editando ? 'Transaccion actualizada con éxito' : 'Transaccion guardado con éxito');
           this.transactionForm.reset();
         },
         error: (err) => {
           this.mensajeError = err.message;
-          console.error('Error al actualizar movimiento:', err)
+          console.error(`Error al ${this.editando ? 'actualizar' : 'crear'} transaccion:`, err)
         }
       });
-    } else {
-      this.transactionService.createTransaction(transaction).subscribe({
-        next: () => {
-          this.cargarTransactions();
-          alert('Transacción realizada con éxito');
-          this.transactionForm.reset();
-        },
-        error: (err) => {
-          this.mensajeError = err.message;
-          console.error('Error al crear movimiento:', err)
-        } 
-      });
-    }
+    
+    this.subscriptions.add(saveSub);
     this.formularioVisible = false;
   }
 
   cancelarFormulario(): void {
     this.formularioVisible = false; // Ocultar el formulario
-    this.transactionForm.reset(); // Opcional: resetear el formulario
+    this.transactionForm.reset(); 
+    this.cargarTransactions();// Opcional: resetear el formulario
   }
 
   getAccountNumber(id: number): string {

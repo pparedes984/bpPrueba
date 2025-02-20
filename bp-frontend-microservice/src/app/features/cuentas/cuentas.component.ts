@@ -3,7 +3,7 @@ import { Account } from '../../core/models/account.module';
 import { CuentasService } from '../../core/services/cuentas.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { debounceTime } from 'rxjs';
+import { debounceTime, Subscription } from 'rxjs';
 import { Client } from '../../core/models/client.module';
 import { ClientesService } from '../../core/services/clientes.service';
 
@@ -23,6 +23,7 @@ export class CuentasComponent implements OnInit{
   filtroId = '';
   accountForm: FormGroup;
   mensajeError: string | null = null;
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private accountService: CuentasService, 
@@ -42,44 +43,58 @@ export class CuentasComponent implements OnInit{
   ngOnInit() {
     this.cargarAccounts();
     this.cargarClientes();
-    this.accountForm.get('id')?.valueChanges
+    const idChangeSub = this.accountForm.get('id')?.valueChanges
           .pipe(debounceTime(300))
           .subscribe(value => this.filtrarAccounts(value));
+
+    if (idChangeSub){
+      this.subscriptions.add(idChangeSub);
+    }
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   cargarClientes(): void {
-    this.clientesService.getClients().subscribe({
+    const loadSub = this.clientesService.getClients().subscribe({
       next: clientes => {
         this.clients = clientes.filter(cliente => cliente.state === 'ACTIVO'); // Filtrar solo clientes activos
       },
-      error: err => console.error('Error al cargar clientes:', err)
+      error: (err) => {
+        this.mensajeError = err.message;
+        console.error('Error al cargar clientes:', err);
+      }
     });
+    this.subscriptions.add(loadSub)
   }
 
   cargarAccounts():void {
-    this.accountService.getAccounts().subscribe({
+    const loadSub = this.accountService.getAccounts().subscribe({
       next: accounts => {
         this.accounts = accounts;
-        this.accountsFiltradas = accounts;
+        this.accountsFiltradas = [...accounts];
       },
       error: (err) => {
         this.mensajeError = err.message;
         console.error('Error al cargar cuentas:', err);
       }
     });
+    this.subscriptions.add(loadSub)
   }
 
   filtrarAccounts(termino: string): void {
-    const idBuscado = Number(termino)
-    if(termino==="") { 
-      this.accountsFiltradas = this.accounts
-    } else {
+    if (!termino) {
+      this.accountsFiltradas = [...this.accounts]
+      return;
+    } 
+
+    const idBuscado = Number(termino);
       this.accountsFiltradas = this.accounts.filter(account =>
-        account.id === idBuscado
-      );
-    }
-    
+        account.id === idBuscado);
   }
+    
+  
 
   nuevaAccount(): void {
     this.accountForm.reset();
@@ -95,7 +110,7 @@ export class CuentasComponent implements OnInit{
 
   deleteAccount(id: number) {
     if (confirm('¿Estás seguro de eliminar esta cuenta?')) {
-      this.accountService.deleteAccount(id).subscribe({
+      const deleteSub = this.accountService.deleteAccount(id).subscribe({
         next: () => {
           this.cargarAccounts();
           alert("Cuenta elminada exitosamente");
@@ -106,6 +121,7 @@ export class CuentasComponent implements OnInit{
 
         }
       });
+      this.subscriptions.add(deleteSub);
     }
   }
 
@@ -113,37 +129,27 @@ export class CuentasComponent implements OnInit{
     if (this.accountForm.invalid) return;
     const account = this.accountForm.value;
     this.mensajeError = null; 
-    if (this.editando) {
-      this.accountService.updateAccount(account.id, account).subscribe({
+    const saveSub = (this.editando ? this.accountService.updateAccount(account.id, account) : this.accountService.createAccount(account))
+      .subscribe({
         next: () => {
           this.cargarAccounts();
-          alert('Cuenta actualizada con éxito');
+          alert(this.editando ? 'Cuenta actualizado con éxito' : 'Cuenta guardado con éxito');
           this.accountForm.reset();
         },
         error: (err) => {
           this.mensajeError = err.message;
-          console.error('Error al actualizar cuenta:', err)
+          console.error(`Error al ${this.editando ? 'actualizar' : 'crear'} cuenta:`, err);
         }
       });
-    } else {
-      this.accountService.createAccount(account).subscribe({
-        next: () => {
-          this.cargarAccounts();
-          alert('Transacción realizada con éxito');
-          this.accountForm.reset();
-        },
-        error: (err) => {
-          this.mensajeError = err.message;
-          console.error('Error al crear cuenta:', err)
-        }
-      });
-    }
+    
+    this.subscriptions.add(saveSub);
     this.formularioVisible = false;
   }
   // Método para cancelar el formulario
   cancelarFormulario(): void {
     this.formularioVisible = false; // Ocultar el formulario
-    this.accountForm.reset(); // Opcional: resetear el formulario
+    this.accountForm.reset();
+    this.cargarAccounts(); // Opcional: resetear el formulario
   }
 
   obtenerNombreCliente(id: number): string {

@@ -1,7 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ReportResponse } from '../models/reportResponse.module';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +13,17 @@ export class ReportesService {
 
   constructor(private http: HttpClient) {}
 
-  obtenerReporte(startDate: string, endDate: string): Observable<any> {
+  obtenerReporte(startDate: string, endDate: string): Observable<ReportResponse> {
     const formattedStartDate = `${startDate}T00:00:00`; // Aseguramos el formato correcto
     const formattedEndDate = `${endDate}T23:59:59`; // Ajustamos para incluir todo el día
-    return this.http.get<any>(`${this.apiUrl}?startDate=${formattedStartDate}&endDate=${formattedEndDate}`);
+    return this.http.get<ReportResponse>(`${this.apiUrl}?startDate=${formattedStartDate}&endDate=${formattedEndDate}`)
+    .pipe(
+      map(response => ({
+        ...response,
+        startDate: new Date(response.startDate),
+        endDate: new Date(response.endDate)
+      }))
+    );
   }
   
 

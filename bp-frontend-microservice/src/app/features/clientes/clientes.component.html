@@ -10,6 +10,9 @@
     <div class="form-group">
       <label for="name">Nombre</label>
       <input type="text" id="name" formControlName="name"  required>
+      <div class="error" *ngIf="clienteForm.get('name')?.invalid && clienteForm.get('name')?.touched">
+        El nombre es obligatorio.
+      </div>
     </div>
     <div class="form-group">
       <label for="gender">Género</label>
@@ -21,18 +24,32 @@
     <div class="form-group">
       <label for="age">Edad</label>
       <input type="number" id="age" formControlName="age"  required>
+      <div class="error" *ngIf="clienteForm.get('age')?.invalid && clienteForm.get('age')?.touched">
+        <span *ngIf="clienteForm.get('age')?.errors?.['required']">La edad es obligatoria.</span>
+        <span *ngIf="clienteForm.get('age')?.errors?.['min']">Debe ser mayor a 0.</span>
+      </div>
     </div>
     <div class="form-group">
       <label for="dni">Identificación</label>
       <input type="text" id="dni" formControlName="dni"  required>
+      <div class="error" *ngIf="clienteForm.get('dni')?.invalid && clienteForm.get('dni')?.touched">
+        <span *ngIf="clienteForm.get('dni')?.errors?.['required']">La identificación es obligatoria.</span>
+        <span *ngIf="clienteForm.get('dni')?.errors?.['pattern']">Solo se permiten números.</span>
+      </div>
     </div>
     <div class="form-group">
       <label for="address">Dirección</label>
       <input type="text" id="address" formControlName="address" >
+      <div class="error" *ngIf="clienteForm.get('address')?.invalid && clienteForm.get('address')?.touched">
+        La direccion es obligatoria.
+      </div>
     </div>
     <div class="form-group">
       <label for="telephone">Teléfono</label>
       <input type="text" id="telephone" formControlName="telephone" >
+      <div class="error" *ngIf="clienteForm.get('telephone')?.invalid && clienteForm.get('telephone')?.touched">
+        El teléfono es obligatorio.
+      </div>
     </div>
     <div class="form-group">
       <label for="state">Estado</label>
@@ -44,6 +61,9 @@
     <div class="form-group">
       <label for="password">Password</label>
       <input type="password" id="password" formControlName="password" >
+      <div class="error" *ngIf="clienteForm.get('password')?.invalid && clienteForm.get('password')?.touched">
+        La contraseña es obligatoria.
+      </div>
     </div>
     <div class="form-buttons">
       <button type="submit" >{{ editando ? 'Actualizar' : 'Guardar' }}</button>

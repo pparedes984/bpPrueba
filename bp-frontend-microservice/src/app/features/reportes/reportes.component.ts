@@ -3,6 +3,7 @@ import { jsPDF } from 'jspdf';
 import { ReportesService } from '../../core/services/reportes.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReportResponse } from '../../core/models/reportResponse.module';
 
 @Component({
   selector: 'app-reportes',
@@ -14,7 +15,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 export class ReportesComponent {
   startDate: string = '';
   endDate: string = '';
-  reportData: any = null;
+  reportData: ReportResponse | null = null ;
 
   constructor(private reportesService: ReportesService) {}
 
@@ -25,19 +26,23 @@ export class ReportesComponent {
     }
 
     this.reportesService.obtenerReporte(this.startDate, this.endDate)
-      .subscribe(
-        data => {
-          this.reportData = data;
-        },
-        error => {
-          console.error('Error al obtener el reporte', error);
-          alert('Hubo un error al obtener el reporte.');
-        }
-      );
+    .subscribe({
+      next: (data) => {
+        this.reportData = {
+          ...data,
+          startDate: new Date(data.startDate),
+          endDate: new Date(data.endDate)
+        };
+      },
+      error: (error) => {
+        console.error('Error al obtener el reporte', error);
+        alert('Hubo un error al obtener el reporte.');
+      }
+    });
   }
 
   generarPDF() {
-    if (!this.reportData) {
+    if (!this.reportData || !this.reportData.accountReports.length) {
       alert('Primero consulta el reporte.');
       return;
     }

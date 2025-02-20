@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ClientesComponent } from './clientes.component';
 import { ClientesService } from '../../core/services/clientes.service';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Client } from '../../core/models/client.module';
@@ -11,23 +11,30 @@ jest.mock('../../core/services/clientes.service');
 
 describe('ClientesComponent', () => {
   let component: ClientesComponent;
-  let fixture: ComponentFixture<ClientesComponent>;
   let clientesService: jest.Mocked<ClientesService>;
+  let formBuilder: FormBuilder;
+  let fixture: ComponentFixture<ClientesComponent>;
 
   beforeEach(async () => {
     clientesService = new ClientesService(null as any) as jest.Mocked<ClientesService>;
-    clientesService.getClients = jest.fn();
-    clientesService.createClient = jest.fn();
-    clientesService.updateClient = jest.fn();
-    clientesService.deleteClient = jest.fn();
+    clientesService.getClients = jest.fn().mockReturnValue(of([]));
+    clientesService.createClient = jest.fn().mockReturnValue(of({}));
+    clientesService.updateClient = jest.fn().mockReturnValue(of({}));
+    clientesService.deleteClient = jest.fn().mockReturnValue(of({}));
+    formBuilder = new FormBuilder();
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, HttpClientTestingModule, ClientesComponent ],
-      providers: [{ provide: ClientesService, useValue: clientesService }]
+      
+      providers: [
+        { provide: ClientesService, useValue: clientesService },
+        { provide: FormBuilder, useValue: formBuilder }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClientesComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
   it('debería crear el componente', () => {
@@ -48,6 +55,11 @@ describe('ClientesComponent', () => {
     expect(component.mensajeError).toBe('Error de carga');
   });
 
+  it('debería validar el formulario antes de guardar', () => {
+    component.guardarCliente();
+    expect(component.clienteForm.invalid).toBeTruthy();
+  });
+
   it('debería filtrar clientes correctamente', () => {
     component.clients = [
       { id: 1, name: 'Juan', dni: '12345678', gender: 'MASCULINO', age: 20, address: 'La luz', state: 'ACTIVO', telephone: '123456', password: 'test' },
@@ -64,4 +76,6 @@ describe('ClientesComponent', () => {
     component.deleteClient(1);
     expect(clientesService.deleteClient).toHaveBeenCalledWith(1);
   });
+
+
 });
