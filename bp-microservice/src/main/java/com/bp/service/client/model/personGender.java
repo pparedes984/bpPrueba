@@ -1,6 +1,6 @@
 package com.bp.service.client.model;
 
-public enum personGender {
+public enum PersonGender {
     MASCULINO,
     FEMENINO
 }

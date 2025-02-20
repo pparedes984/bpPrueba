@@ -2,6 +2,7 @@ package com.bp.service.account.controller;
 
 import com.bp.service.account.model.dto.AccountDTO;
 import com.bp.service.account.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO accountDTO) {
+    public ResponseEntity<AccountDTO> createAccount(@Valid @RequestBody AccountDTO accountDTO) {
         log.info("Handling POST request to /cuentas with account: {}", accountDTO);
         try {
             AccountDTO newAccount = accountService.saveAccount(accountDTO);
@@ -57,7 +58,7 @@ public class AccountController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AccountDTO> updateAccount(@PathVariable Long id, @RequestBody AccountDTO accountDetails) {
+    public ResponseEntity<AccountDTO> updateAccount(@PathVariable Long id, @Valid @RequestBody AccountDTO accountDetails) {
         log.info("Handling PUT request to /cuentas/{}", id);
         try {
             AccountDTO updatedAccount = accountService.updateAccount(id, accountDetails);

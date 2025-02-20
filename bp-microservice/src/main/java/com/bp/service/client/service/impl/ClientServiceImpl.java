@@ -1,9 +1,9 @@
 package com.bp.service.client.service.impl;
 
 import com.bp.service.client.model.Client;
-import com.bp.service.client.model.clientState;
+import com.bp.service.client.model.ClientState;
 import com.bp.service.client.model.dto.ClientDTO;
-import com.bp.service.client.model.personGender;
+import com.bp.service.client.model.PersonGender;
 import com.bp.service.client.service.ClientService;
 import com.bp.service.exception.ResourceNotFoundException;
 import com.bp.service.client.repository.ClientRepository;
@@ -69,7 +69,7 @@ public class ClientServiceImpl implements ClientService {
             client.setName(clientDetails.getName());
 
         if (clientDetails.getGender() != null)
-            client.setGender(personGender.valueOf(clientDetails.getGender().toUpperCase()));
+            client.setGender(PersonGender.valueOf(clientDetails.getGender().toUpperCase()));
 
         if (clientDetails.getAge() > 0)
             client.setAge(clientDetails.getAge());
@@ -87,7 +87,7 @@ public class ClientServiceImpl implements ClientService {
             client.setPassword(clientDetails.getPassword());
 
         if (clientDetails.getState() != null)
-            client.setState(clientState.valueOf(clientDetails.getState().toUpperCase()));
+            client.setState(ClientState.valueOf(clientDetails.getState().toUpperCase()));
 
         Client updatedClient = clientRepository.save(client);
         return convertToDTO(updatedClient);
@@ -123,12 +123,12 @@ public class ClientServiceImpl implements ClientService {
         Client client = new Client();
         client.setId(dto.getId());
         client.setName(dto.getName());
-        client.setGender(personGender.valueOf(dto.getGender().toUpperCase())); // Convertir String a Enum
+        client.setGender(PersonGender.valueOf(dto.getGender().toUpperCase())); // Convertir String a Enum
         client.setAge(dto.getAge());
         client.setDni(dto.getDni());
         client.setAddress(dto.getAddress());
         client.setTelephone(dto.getTelephone());
-        client.setState(clientState.valueOf(dto.getState().toUpperCase())); // Convertir String a Enum
+        client.setState(ClientState.valueOf(dto.getState().toUpperCase())); // Convertir String a Enum
         client.setPassword(dto.getPassword());
         return client;
     }

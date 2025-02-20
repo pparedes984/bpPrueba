@@ -25,7 +25,7 @@ public class Transaction {
 
     @Column(name="transactionType")
     @Enumerated(EnumType.STRING)
-    private transactionType transactionType;
+    private TransactionType transactionType;
 
     @Column(name="value")
     private Double value;

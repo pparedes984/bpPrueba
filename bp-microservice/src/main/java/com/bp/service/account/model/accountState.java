@@ -1,6 +1,6 @@
 package com.bp.service.account.model;
 
-public enum accountState {
+public enum AccountState {
     ACTIVA,
     INACTIVA
 }

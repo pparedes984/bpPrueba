@@ -2,8 +2,8 @@ package com.bp.service.client.service;
 
 import com.bp.service.client.model.Client;
 import com.bp.service.client.model.dto.ClientDTO;
-import com.bp.service.client.model.clientState;
-import com.bp.service.client.model.personGender;
+import com.bp.service.client.model.ClientState;
+import com.bp.service.client.model.PersonGender;
 import com.bp.service.client.repository.ClientRepository;
 import com.bp.service.client.service.impl.ClientServiceImpl;
 import com.bp.service.exception.ResourceNotFoundException;
@@ -36,13 +36,13 @@ public class ClientServiceImplTest {
         client = new Client();
         client.setId(1L);
         client.setName("John Doe");
-        client.setGender(personGender.MASCULINO);
+        client.setGender(PersonGender.MASCULINO);
         client.setAge(30);
         client.setDni("12345678");
         client.setAddress("123 Main St");
         client.setTelephone("1234567890");
         client.setPassword("securepassword");
-        client.setState(clientState.ACTIVO);
+        client.setState(ClientState.ACTIVO);
 
         clientDTO = new ClientDTO();
         clientDTO.setId(1L);

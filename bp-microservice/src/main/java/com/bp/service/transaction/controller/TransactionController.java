@@ -2,6 +2,7 @@ package com.bp.service.transaction.controller;
 
 import com.bp.service.transaction.model.dto.TransactionDTO;
 import com.bp.service.transaction.service.TransactionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,7 @@ public class TransactionController {
 
     @PostMapping("/{accountId}")
     public ResponseEntity<TransactionDTO> createTransaction(
-            @PathVariable Long accountId, @RequestBody TransactionDTO transaction) {
+            @PathVariable Long accountId, @Valid @RequestBody TransactionDTO transaction) {
         log.info("Handling POST request to /movimientos");
         try {
             TransactionDTO newTransaction = transactionService.saveTransaction(accountId, transaction);
@@ -61,7 +62,7 @@ public class TransactionController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TransactionDTO> updateTransaction(
-            @PathVariable Long id, @RequestBody TransactionDTO transactionDetails) {
+            @PathVariable Long id, @Valid @RequestBody TransactionDTO transactionDetails) {
         log.info("Handling PUT request to /movimientos/{}", id);
         try {
             TransactionDTO updatedTransaction = transactionService.updateTransaction(id, transactionDetails);

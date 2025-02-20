@@ -1,13 +1,11 @@
 package com.bp.service.transaction.service.impl;
 
 import com.bp.service.account.model.Account;
-import com.bp.service.account.model.accountState;
 import com.bp.service.account.model.dto.AccountDTO;
 import com.bp.service.account.service.AccountService;
-import com.bp.service.account.service.impl.AccountServiceImpl;
 import com.bp.service.transaction.model.Transaction;
 import com.bp.service.transaction.model.dto.TransactionDTO;
-import com.bp.service.transaction.model.transactionType;
+import com.bp.service.transaction.model.TransactionType;
 import com.bp.service.transaction.repository.TransactionRepository;
 import com.bp.service.transaction.service.TransactionService;
 import com.bp.service.exception.InactiveAccountException;
@@ -15,7 +13,6 @@ import com.bp.service.exception.ResourceNotFoundException;
 import com.bp.service.exception.SaldoInsuficienteException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,27 +55,17 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionDTO saveTransaction(Long accountId, TransactionDTO transactionDTO) {
         log.info("Creando movimiento asociado al numero de cuenta {}", accountId);
         AccountDTO account = accountService.getAccountById(accountId);
-        // Verificar si la cuenta está ACTIVA antes de procesar la transacción
-        if (account.getState().equals("INACTIVA")) {
-            log.error("La cuenta {} está inactiva. No se puede realizar la transacción.", accountId);
-            throw new InactiveAccountException("La cuenta está inactiva. No se puede procesar la transacción.");
-        }
+        validateAccountIsActive(account);
+
+
 
         Transaction transaction = convertToEntity(transactionDTO);
         transaction.setDate(LocalDateTime.now());
-        if(transaction.getTransactionType().equals(transactionType.CREDITO)) {
-            transaction.setBalance(account.getBalance() + (transaction.getValue()));
-        } else {
-            if (account.getBalance() < transaction.getValue()) {
-                log.error("Saldo no disponible");
-                throw new SaldoInsuficienteException("Saldo no disponible");
-            }
-            transaction.setBalance(account.getBalance() - transaction.getValue());
-
-        }
-
         transaction.setAccountId(account.getId());
+        transaction.setBalance(calculateNewBalance(account.getBalance(), transaction));
         account.setBalance(transaction.getBalance());
+
+
 
         accountService.updateAccount(accountId, account);
 
@@ -90,19 +77,25 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public TransactionDTO updateTransaction(Long id, TransactionDTO transactionDetails) {
         log.info("Actualizando movimiento con ID: {}", id);
-        Transaction transaction =  transactionRepository.findById(id)
+        Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Movimiento no encontrado"));
+
+        AccountDTO accountDTO = accountService.getAccountById(transaction.getAccountId());
+        double saldoOriginal = revertOldTransaction(transaction, accountDTO.getBalance());
 
         if (transactionDetails.getDate() != null)
             transaction.setDate(transactionDetails.getDate());
         if (transactionDetails.getTransactionType() != null)
-            transaction.setTransactionType(transactionType.valueOf(transactionDetails.getTransactionType().toUpperCase()));
-        if (transactionDetails.getBalance() != null)
-            transaction.setBalance(transactionDetails.getBalance());
+            transaction.setTransactionType(TransactionType.valueOf(transactionDetails.getTransactionType().toUpperCase()));
         if (transactionDetails.getValue() != null)
             transaction.setValue(transactionDetails.getValue());
 
+        transaction.setBalance(calculateNewBalance(saldoOriginal, transaction));
+        accountDTO.setBalance(transaction.getBalance());
+        accountService.updateAccount(transaction.getAccountId(), accountDTO);
+
         Transaction updatedTransaction = transactionRepository.save(transaction);
+
         return convertToDTO(updatedTransaction);
     }
 
@@ -116,6 +109,32 @@ public class TransactionServiceImpl implements TransactionService {
                 });
 
         transactionRepository.delete(transaction);
+    }
+
+    private void validateAccountIsActive(AccountDTO account) {
+        if ("INACTIVA".equals(account.getState())) {
+            throw new InactiveAccountException("La cuenta está inactiva. No se puede procesar la transacción.");
+        }
+    }
+
+    private double calculateNewBalance(double currentBalance, Transaction transaction) {
+        if (transaction.getTransactionType() == TransactionType.CREDITO) {
+            return currentBalance + transaction.getValue();
+        } else {
+            if (currentBalance < transaction.getValue()) {
+                log.error("Saldo insuficiente para la transacción");
+                throw new SaldoInsuficienteException("Saldo insuficiente para la transacción");
+            }
+            return currentBalance - transaction.getValue();
+        }
+    }
+
+    private double revertOldTransaction(Transaction transaction, double currentBalance) {
+        if (transaction.getTransactionType() == TransactionType.CREDITO) {
+            return currentBalance - transaction.getValue();
+        } else {
+            return currentBalance + transaction.getValue();
+        }
     }
 
     private TransactionDTO convertToDTO(Transaction transaction) {
@@ -135,7 +154,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setDate(transactionDTO.getDate());
         transaction.setValue(transactionDTO.getValue());
         transaction.setBalance(transactionDTO.getBalance());
-        transaction.setTransactionType(transactionType.valueOf(transactionDTO.getTransactionType().toUpperCase()));
+        transaction.setTransactionType(TransactionType.valueOf(transactionDTO.getTransactionType().toUpperCase()));
 
         return transaction;
     }

@@ -1,11 +1,10 @@
 package com.bp.service.transaction.service;
 import com.bp.service.account.model.dto.AccountDTO;
 import com.bp.service.account.service.AccountService;
-import com.bp.service.exception.InactiveAccountException;
 import com.bp.service.exception.ResourceNotFoundException;
 import com.bp.service.transaction.model.Transaction;
 import com.bp.service.transaction.model.dto.TransactionDTO;
-import com.bp.service.transaction.model.transactionType;
+import com.bp.service.transaction.model.TransactionType;
 import com.bp.service.transaction.repository.TransactionRepository;
 import com.bp.service.transaction.service.impl.TransactionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +40,7 @@ class TransactionServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        transaction = new Transaction(1L, LocalDateTime.now(), transactionType.CREDITO, 100.0, 500.0, 1L);
+        transaction = new Transaction(1L, LocalDateTime.now(), TransactionType.CREDITO, 100.0, 500.0, 1L);
         transactionDTO = new TransactionDTO(1L, LocalDateTime.now(), "CREDITO", 100.0, 500.0, 1L);
         accountDTO = new AccountDTO(1L, "123456", "AHORROS", 400.0, "ACTIVA", 1L);
     }

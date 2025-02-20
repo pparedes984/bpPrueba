@@ -1,17 +1,15 @@
 package com.bp.service.account.service.impl;
 
 import com.bp.service.account.model.Account;
-import com.bp.service.account.model.accountState;
-import com.bp.service.account.model.accountType;
+import com.bp.service.account.model.AccountState;
+import com.bp.service.account.model.AccountType;
 import com.bp.service.account.model.dto.AccountDTO;
 import com.bp.service.account.repository.AccountRepository;
 import com.bp.service.account.service.AccountService;
 import com.bp.service.client.service.ClientService;
-import com.bp.service.client.service.impl.ClientServiceImpl;
 import com.bp.service.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,11 +65,11 @@ public class AccountServiceImpl implements AccountService {
         if (accountDetails.getAccountNumber() != null)
             account.setAccountNumber(accountDetails.getAccountNumber());
         if (accountDetails.getAccountType() != null)
-            account.setAccountType(accountType.valueOf(accountDetails.getAccountType().toUpperCase()));
+            account.setAccountType(AccountType.valueOf(accountDetails.getAccountType().toUpperCase()));
         if (accountDetails.getBalance() != null)
             account.setBalance(accountDetails.getBalance());
         if (accountDetails.getState() != null)
-            account.setState(accountState.valueOf(accountDetails.getState().toUpperCase()));
+            account.setState(AccountState.valueOf(accountDetails.getState().toUpperCase()));
         Account updatedAccount = accountRepository.save(account);
         return convertToDTO(updatedAccount);
 
@@ -105,9 +103,9 @@ public class AccountServiceImpl implements AccountService {
         Account account = new Account();
         account.setId(accountDTO.getId());
         account.setAccountNumber(accountDTO.getAccountNumber());
-        account.setAccountType(accountType.valueOf(accountDTO.getAccountType().toUpperCase()));
+        account.setAccountType(AccountType.valueOf(accountDTO.getAccountType().toUpperCase()));
         account.setBalance(accountDTO.getBalance());
-        account.setState(accountState.valueOf(accountDTO.getState().toUpperCase()));
+        account.setState(AccountState.valueOf(accountDTO.getState().toUpperCase()));
         account.setClientId(accountDTO.getClientId());
         return account;
     }

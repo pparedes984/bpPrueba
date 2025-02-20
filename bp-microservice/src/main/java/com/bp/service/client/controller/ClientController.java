@@ -2,6 +2,7 @@ package com.bp.service.client.controller;
 
 import com.bp.service.client.model.dto.ClientDTO;
 import com.bp.service.client.service.ClientService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientDTO> createClient(@RequestBody ClientDTO clientDTO) {
+    public ResponseEntity<ClientDTO> createClient(@Valid @RequestBody ClientDTO clientDTO) {
         log.info("Handling POST request to /clientes");
         try {
             ClientDTO newClient = clientService.saveClient(clientDTO);
@@ -58,7 +59,7 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientDTO> updateClient(@PathVariable Long id, @RequestBody ClientDTO clientDetails) {
+    public ResponseEntity<ClientDTO> updateClient(@PathVariable Long id, @Valid @RequestBody ClientDTO clientDetails) {
         log.info("Handling PUT request to /clientes/{}", id);
         try {
             ClientDTO updatedClient = clientService.updateClient(id, clientDetails);

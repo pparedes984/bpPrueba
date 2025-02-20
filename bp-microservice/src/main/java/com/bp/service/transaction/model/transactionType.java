@@ -1,6 +1,6 @@
 package com.bp.service.transaction.model;
 
-public enum transactionType {
+public enum TransactionType {
     DEBITO,
     CREDITO
 }

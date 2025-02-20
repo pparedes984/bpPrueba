@@ -1,7 +1,7 @@
 package com.bp.service.account.service;
 import com.bp.service.account.model.Account;
-import com.bp.service.account.model.accountState;
-import com.bp.service.account.model.accountType;
+import com.bp.service.account.model.AccountState;
+import com.bp.service.account.model.AccountType;
 import com.bp.service.account.model.dto.AccountDTO;
 import com.bp.service.account.repository.AccountRepository;
 import com.bp.service.account.service.impl.AccountServiceImpl;
@@ -34,7 +34,7 @@ class AccountServiceImplTest {
     @Test
     void testGetAllAccounts() {
 
-        Account account = new Account(1L, "12345", accountType.AHORROS, 1000.0, accountState.ACTIVA, 1L);
+        Account account = new Account(1L, "12345", AccountType.AHORROS, 1000.0, AccountState.ACTIVA, 1L);
         when(accountRepository.findAll()).thenReturn(List.of(account));
 
         List<AccountDTO> result = accountService.getAllAccounts();
@@ -45,7 +45,7 @@ class AccountServiceImplTest {
 
     @Test
     void testGetAccountById() {
-        Account account = new Account(1L, "12345", accountType.AHORROS, 1000.0, accountState.ACTIVA, 1L);
+        Account account = new Account(1L, "12345", AccountType.AHORROS, 1000.0, AccountState.ACTIVA, 1L);
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
         AccountDTO result = accountService.getAccountById(1L);
@@ -57,7 +57,7 @@ class AccountServiceImplTest {
     @Test
     void testUpdateAccount() {
         AccountDTO accountDTO = new AccountDTO(1L, "12345", "AHORROS", 1000.0, "ACTIVA", 1L);
-        Account existingAccount = new Account(1L, "12345", accountType.AHORROS, 1000.0, accountState.ACTIVA, 1L);
+        Account existingAccount = new Account(1L, "12345", AccountType.AHORROS, 1000.0, AccountState.ACTIVA, 1L);
         when(accountRepository.findById(1L)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
 
@@ -68,7 +68,7 @@ class AccountServiceImplTest {
 
     @Test
     void testDeleteAccount() {
-        Account account = new Account(1L, "12345", accountType.AHORROS, 1000.0, accountState.ACTIVA, 1L);
+        Account account = new Account(1L, "12345", AccountType.AHORROS, 1000.0, AccountState.ACTIVA, 1L);
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
 
         accountService.deleteAccount(1L);
@@ -86,9 +86,9 @@ class AccountServiceImplTest {
         // Simulación de cuenta
         Account account = new Account();
         account.setAccountNumber(accountDTO.getAccountNumber());
-        account.setAccountType(accountType.valueOf(accountDTO.getAccountType().toUpperCase()));
+        account.setAccountType(AccountType.valueOf(accountDTO.getAccountType().toUpperCase()));
         account.setBalance(accountDTO.getBalance());
-        account.setState(accountState.valueOf(accountDTO.getState().toUpperCase()));
+        account.setState(AccountState.valueOf(accountDTO.getState().toUpperCase()));
         account.setClientId(accountDTO.getClientId());
 
         // Mocking repository save

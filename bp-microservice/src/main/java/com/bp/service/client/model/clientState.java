@@ -1,6 +1,6 @@
 package com.bp.service.client.model;
 
-public enum clientState {
+public enum ClientState {
     ACTIVO,
     INACTIVO;
 }

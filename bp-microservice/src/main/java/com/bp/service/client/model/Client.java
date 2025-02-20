@@ -17,7 +17,7 @@ public class Client extends Person {
 
     @Column(name="state", nullable = false)
     @Enumerated(EnumType.STRING)
-    private clientState state;
+    private ClientState state;
 }
 
 

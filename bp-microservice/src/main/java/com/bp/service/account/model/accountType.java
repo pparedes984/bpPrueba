@@ -1,6 +1,6 @@
 package com.bp.service.account.model;
 
-public enum accountType {
+public enum AccountType {
     AHORROS,
     CORRIENTE
 }

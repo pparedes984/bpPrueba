@@ -19,7 +19,7 @@ public class Person {
     private String name;
 
     @Column(name="gender", nullable = false)
-    private personGender gender;
+    private PersonGender gender;
 
 
     @Column(name="age", nullable = false)

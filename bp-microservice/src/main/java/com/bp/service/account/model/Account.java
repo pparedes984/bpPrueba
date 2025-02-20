@@ -1,6 +1,5 @@
 package com.bp.service.account.model;
 
-import com.bp.service.client.model.Client;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,14 +22,14 @@ public class Account {
 
     @Column(name = "accountType")
     @Enumerated(EnumType.STRING)
-    private accountType accountType;
+    private AccountType accountType;
 
     @Column(name = "balance")
     private Double balance;
 
     @Column(name = "state")
     @Enumerated(EnumType.STRING)
-    private accountState state;
+    private AccountState state;
 
     @Column(name = "clientId")
     private Long clientId;
